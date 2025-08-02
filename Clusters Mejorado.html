@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluador Avanzado de Trastornos de Personalidad - DSM-5-TR</title>
+    <style>
+        :root {
+            --cluster-a: #6a8fd8;
+            --cluster-b: #d86a6a;
+            --cluster-c: #6ad86a;
+            --advanced: #d8d86a;
+            --neutral: #f5f5f5;
+            --dark: #333;
+        }
+        
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--neutral);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--cluster-a), var(--cluster-b), var(--cluster-c), var(--advanced));
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            animation: fadeIn 1s ease-in;
+        }
+        
+        .subtitle {
+            font-style: italic;
+            opacity: 0.9;
+            animation: fadeIn 1.5s ease-in;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            margin: 0 0.5rem;
+            border: none;
+            background-color: white;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .tab-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .tab-btn.active {
+            color: white;
+        }
+        
+        .cluster-a-btn.active {
+            background-color: var(--cluster-a);
+        }
+        
+        .cluster-b-btn.active {
+            background-color: var(--cluster-b);
+        }
+        
+        .cluster-c-btn.active {
+            background-color: var(--cluster-c);
+        }
+        
+        .advanced-btn.active {
+            background-color: var(--advanced);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .criteria-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .criterion {
+            background-color: var(--neutral);
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-left: 4px solid #ccc;
+            transition: all 0.3s ease;
+        }
+        
+        .criterion:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .cluster-a .criterion {
+            border-left-color: var(--cluster-a);
+        }
+        
+        .cluster-b .criterion {
+            border-left-color: var(--cluster-b);
+        }
+        
+        .cluster-c .criterion {
+            border-left-color: var(--cluster-c);
+        }
+        
+        .criterion-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: inherit;
+        }
+        
+        .criterion-details {
+            display: none;
+            padding-top: 0.5rem;
+            border-top: 1px dashed #ccc;
+            margin-top: 0.5rem;
+        }
+        
+        .criterion-details.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .specifiers, .duration {
+            background-color: rgba(255,255,255,0.7);
+            padding: 0.8rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            border-left: 3px solid #888;
+        }
+        
+        .specifiers h4, .duration h4 {
+            margin-top: 0;
+            color: #555;
+        }
+        
+        .practice-section {
+            margin-top: 3rem;
+            border-top: 2px dashed #ccc;
+            padding-top: 2rem;
+        }
+        
+        .difficulty-tabs {
+            display: flex;
+            margin: 1rem 0;
+        }
+        
+        .difficulty-tab {
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+            background-color: #eee;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .difficulty-tab.active {
+            background-color: var(--cluster-a);
+            color: white;
+        }
+        
+        .case-study {
+            background-color: var(--neutral);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .case-study.advanced {
+            border-left: 5px solid var(--advanced);
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .option {
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            background-color: #f0f0f0;
+            border-color: #aaa;
+        }
+        
+        .option.selected {
+            border-color: var(--cluster-b);
+            background-color: rgba(216, 106, 106, 0.1);
+            font-weight: bold;
+        }
+        
+        .option.correct {
+            border-color: var(--cluster-c);
+            background-color: rgba(106, 216, 106, 0.1);
+        }
+        
+        .option.incorrect {
+            border-color: var(--cluster-b);
+            background-color: rgba(216, 106, 106, 0.1);
+            opacity: 0.7;
+        }
+        
+        .feedback {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .feedback.show {
+            display: block;
+        }
+        
+        .feedback.correct {
+            background-color: rgba(106, 216, 106, 0.2);
+            border-left: 4px solid var(--cluster-c);
+        }
+        
+        .feedback.incorrect {
+            background-color: rgba(216, 106, 106, 0.2);
+            border-left: 4px solid var(--cluster-b);
+        }
+        
+        .submit-btn, .next-btn {
+            padding: 0.8rem 1.5rem;
+            background-color: var(--cluster-a);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .submit-btn:hover, .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .next-btn {
+            display: none;
+            background-color: var(--cluster-c);
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            border-radius: 8px;
+            background: linear-gradient(90deg, var(--cluster-a), var(--cluster-b), var(--cluster-c), var(--advanced));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .differential-list {
+            background-color: rgba(106, 141, 216, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--cluster-a);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tab-btn {
+                margin: 0.3rem 0;
+                width: 80%;
+            }
+            
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            .difficulty-tabs {
+                flex-direction: column;
+            }
+            
+            .difficulty-tab {
+                margin-bottom: 0.5rem;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Evaluador Avanzado de Trastornos de Personalidad</h1>
+        <p class="subtitle">Herramienta interactiva basada en el DSM-5-TR para el diagnóstico diferencial</p>
+    </header>
+    
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn cluster-a-btn active" data-tab="cluster-a">Cluster A</button>
+            <button class="tab-btn cluster-b-btn" data-tab="cluster-b">Cluster B</button>
+            <button class="tab-btn cluster-c-btn" data-tab="cluster-c">Cluster C</button>
+            <button class="tab-btn advanced-btn" data-tab="advanced">Casos Avanzados</button>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        
+        <!-- Cluster A Content -->
+        <div id="cluster-a" class="tab-content cluster-a active">
+            <h2>Cluster A: Trastornos Excéntricos o Raros (DSM-5-TR)</h2>
+            <p>Este cluster incluye trastornos caracterizados por pensamiento o comportamiento excéntrico, raro o inusual.</p>
+            
+            <h3>Criterios Diagnósticos DSM-5-TR</h3>
+            <ul class="criteria-list">
+                <li class="criterion">
+                    <div class="criterion-title">
+                        <span>Trastorno Paranoide de la Personalidad (F60.0)</span>
+                        <button class="toggle-btn">+</button>
+                    </div>
+                    <div class="criterion-details">
+                        <p><strong>Patrón general de desconfianza y suspicacia:</strong> Los motivos de los demás son interpretados como malévolos, que comienza en las primeras etapas de la edad adulta y está presente en diversos contextos.</p>
+                        <p><strong>Criterios (necesarios 4 o más):</strong></p>
+                        <ol>
+                            <li>Sospecha, sin base suficiente, de que los demás se van a aprovechar, causar daño o engañar.</li>
+                            <li>Preocupación por dudas no justificadas acerca de la lealtad o la fidelidad de los amigos o colegas.</li>
+                            <li>Renuencia a confiar en los demás por temor injustificado a que la información se utilice en su contra.</li>
+                            <li>Lectura de significados ocultos, degradantes o amenazantes en comentarios o eventos benignos.</li>
+                            <li>Rencor persistente (no olvida insultos, injurias o desprecios).</li>
+                            <li>Percepción de ataques a su carácter o reputación que no son aparentes para los demás, con reacción rápida y contraria.</li>
+                            <li>Sospechas recurrentes, sin justificación, respecto a la fidelidad del cónyuge o pareja.</li>
+                        </ol>
+                        
+                        <div class="duration">
+                            <h4>Duración y curso:</h4>
+                            <p>El trastorno suele manifestarse en la edad adulta temprana y persiste a lo largo del tiempo. Puede ser más evidente en situaciones de estrés o cuando el individuo percibe una amenaza a su autonomía.</p>
+                        </div>
+                        
+                        <div class="specifiers">
+                            <h4>Especificadores:</h4>
+                            <p><strong>Con rasgos psicóticos:</strong> Cuando hay creencias paranoides cercanas al delirio pero sin pérdida completa de contacto con la realidad.</p>
+                            <p><strong>Nivel de severidad:</strong> Leve, Moderado, Grave o Extremo basado en deterioro funcional y necesidad de supervisión.</p>
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="criterion">
+                    <div class="criterion-title">
+                        <span>Trastorno Esquizoide de la Personalidad (F60.1)</span>
+                        <button class="toggle-btn">+</button>
+                    </div>
+                    <div class="criterion-details">
+                        <p><strong>Patrón general de distanciamiento de las relaciones sociales:</strong> Gama restringida de expresión emocional en contextos interpersonales, que comienza en las primeras etapas de la edad adulta y está presente en diversos contextos.</p>
+                        <p><strong>Criterios (necesarios 4 o más):</strong></p>
+                        <ol>
+                            <li>Ni desea ni disfruta de las relaciones cercanas, incluido ser parte de una familia.</li>
+                            <li>Casi siempre elige actividades solitarias.</li>
+                            <li>Poco o ningún interés en tener experiencias sexuales con otra persona.</li>
+                            <li>Disfruta con pocas o ninguna actividad.</li>
+                            <li>No tiene amigos íntimos o de confianza, aparte de familiares de primer grado.</li>
+                            <li>Se muestra indiferente a los elogios o críticas de los demás.</li>
+                            <li>Muestra frialdad emocional, distanciamiento o aplanamiento afectivo.</li>
+                        </ol>
+                        
+                        <div class="duration">
+                            <h4>Duración y curso:</h4>
+                            <p>El trastorno es estable a lo largo del tiempo, con patrones de comportamiento que suelen comenzar en la infancia o adolescencia con soledad, bajo rendimiento escolar y marcada preferencia por actividades solitarias.</p>
+                        </div>
+                        
+                        <div class="specifiers">
+                            <h4>Especificadores:</h4>
+                            <p><strong>Con rasgos depresivos:</strong> Cuando coexiste con síntomas depresivos pero no cumplen criterios para un trastorno depresivo mayor.</p>
+                            <p><strong>Nivel de severidad:</strong> Leve, Moderado, Grave o Extremo basado en deterioro funcional.</p>
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="criterion">
+                    <div class="criterion-title">
+                        <span>Trastorno Esquizotípico de la Personalidad (F21)</span>
+                        <button class="toggle-btn">+</button>
+                    </div>
+                    <div class="criterion-details">
+                        <p><strong>Patrón general de déficit sociales e interpersonales:</strong> Malestar agudo y poca capacidad para las relaciones cercanas, distorsiones cognitivas o perceptivas y excentricidades del comportamiento, que comienza en las primeras etapas de la edad adulta y está presente en diversos contextos.</p>
+                        <p><strong>Criterios (necesarios 5 o más):</strong></p>
+                        <ol>
+                            <li>Ideas de referencia (excluidas las ideas delirantes de referencia).</li>
+                            <li>Creencias raras o pensamiento mágico que influye en el comportamiento y no es consistente con normas subculturales.</li>
+                            <li>Experiencias perceptivas inusuales, incluidas ilusiones corporales.</li>
+                            <li>Pensamiento y lenguaje raros (vago, circunstancial, metafórico, sobreelaborado o estereotipado).</li>
+                            <li>Suspicacia o ideación paranoide.</li>
+                            <li>Afecto inapropiado o restringido.</li>
+                            <li>Comportamiento o apariencia rara, excéntrica o peculiar.</li>
+                            <li>Falta de amigos íntimos o de confianza aparte de familiares de primer grado.</li>
+                            <li>Ansiedad social excesiva que no disminuye con la familiarización y tiende a asociarse con los temores paranoides más que con juicios negativos sobre uno mismo.</li>
+                        </ol>
+                        
+                        <div class="duration">
+                            <h4>Duración y curso:</h4>
+                            <p>El trastorno es crónico, aunque algunos síntomas (particularmente las experiencias perceptivas inusuales) pueden fluctuar en intensidad. Puede preceder al desarrollo de esquizofrenia, aunque la mayoría no desarrolla este trastorno.</p>
+                        </div>
+                        
+                        <div class="specifiers">
+                            <h4>Especificadores:</h4>
+                            <p><strong>Con rasgos psicóticos transitorios:</strong> Cuando hay episodios breves de síntomas psicóticos en respuesta al estrés.</p>
+                            <p><strong>Con rasgos esquizofreniformes:</strong> Cuando hay síntomas más pronunciados pero de duración insuficiente para esquizofrenia.</p>
+                            <p><strong>Nivel de severidad:</strong> Leve, Moderado, Grave o Extremo basado en deterioro funcional.</p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            
+            <div class="practice-section">
+                <h3>Ejercicio Práctico: Caso Cluster A</h3>
+                
+                <div class="difficulty-tabs">
+                    <button class="difficulty-tab active" data-difficulty="basic">Básico</button>
+                    <button class="difficulty-tab" data-difficulty="intermediate">Intermedio</button>
+                </div>
+                
+                <div class="case-study basic-case">
+                    <p><strong>Caso Básico:</strong> Juan, 32 años, es llevado a consulta por su hermana. Trabaja como programador y rara vez interactúa con sus compañeros. Prefiere comer solo en su escritorio y evita las reuniones sociales de la empresa. En la entrevista, habla de manera muy formal y técnica, sin mostrar emociones. Menciona que prefiere estar solo porque "la gente es impredecible y ruidosa". No tiene amigos cercanos y pasa sus fines de semana jugando videojuegos o leyendo sobre temas científicos. Niega sentirse triste o deprimido, simplemente prefiere su soledad.</p>
+                    
+                    <div class="options" id="cluster-a-basic-options">
+                        <div class="option" data-correct="false">Trastorno Paranoide de la Personalidad</div>
+                        <div class="option" data-correct="true">Trastorno Esquizoide de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno Esquizotípico de la Personalidad</div>
+                    </div>
+                    
+                    <button class="submit-btn">Verificar respuesta</button>
+                    <button class="next-btn">Siguiente caso</button>
+                    
+                    <div class="feedback">
+                        <p><strong>Explicación:</strong> Juan muestra un patrón claro de distanciamiento de las relaciones sociales y una gama restringida de expresión emocional, que son características centrales del Trastorno Esquizoide de la Personalidad. No hay evidencia de suspicacia (como en el paranoide) ni de pensamiento mágico o comportamiento excéntrico (como en el esquizotípico).</p>
+                    </div>
+                </div>
+                
+                <div class="case-study intermediate-case" style="display: none;">
+                    <p><strong>Caso Intermedio:</strong> Laura, 28 años, consulta por "problemas para encajar". Describe que desde la adolescencia ha tenido "experiencias especiales" como escuchar susurros cuando está sola o sentir que ciertos números tienen significados ocultos. Viste con ropas holgadas y colores poco combinados, con algunos amuletos que dice "protegen su energía". Su lenguaje es vago y a veces da respuestas tangenciales. Tiene una hermana con la que mantiene contacto esporádico, pero no amigos cercanos. Trabaja como archivista y sus compañeros la describen como "rara pero inofensiva". En la entrevista muestra afecto restringido y ocasional suspicacia hacia las preguntas del evaluador.</p>
+                    
+                    <div class="options" id="cluster-a-intermediate-options">
+                        <div class="option" data-correct="false">Trastorno Paranoide de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno Esquizoide de la Personalidad</div>
+                        <div class="option" data-correct="true">Trastorno Esquizotípico de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno del Espectro de la Esquizofrenia</div>
+                    </div>
+                    
+                    <button class="submit-btn">Verificar respuesta</button>
+                    <button class="next-btn">Siguiente caso</button>
+                    
+                    <div class="feedback">
+                        <p><strong>Explicación:</strong> Laura presenta múltiples características del Trastorno Esquizotípico de la Personalidad: experiencias perceptivas inusuales, pensamiento mágico, comportamiento excéntrico, lenguaje vago, afecto restringido y falta de relaciones cercanas. Aunque algunos síntomas podrían sugerir un trastorno del espectro de la esquizofrenia, la ausencia de delirios o alucinaciones claras y el menor deterioro funcional apoyan el diagnóstico de trastorno esquizotípico.</p>
+                        
+                        <div class="differential-list">
+                            <h4>Diagnóstico Diferencial:</h4>
+                            <ul>
+                                <li><strong>Trastorno Del Espectro de la Esquizofrenia:</strong> Requiere síntomas psicóticos más marcados y deterioro funcional más severo.</li>
+                                <li><strong>Trastorno de Personalidad Paranoide:</strong> No muestra la suspicacia extrema característica.</li>
+                                <li><strong>Trastorno de Personalidad Esquizoide:</strong> Presenta más que simple aislamiento, con claras distorsiones cognitivas y perceptivas.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cluster B Content -->
+        <div id="cluster-b" class="tab-content cluster-b">
+            <h2>Cluster B: Trastornos Dramáticos, Emocionales o Erráticos (DSM-5-TR)</h2>
+            <p>Este cluster incluye trastornos caracterizados por comportamiento dramático, emocional o errático.</p>
+            
+            <h3>Criterios Diagnósticos DSM-5-TR</h3>
+            <ul class="criteria-list">
+                <li class="criterion">
+                    <div class="criterion-title">
+                        <span>Trastorno Antisocial de la Personalidad (F60.2)</span>
+                        <button class="toggle-btn">+</button>
+                    </div>
+                    <div class="criterion-details">
+                        <p><strong>Patrón general de desprecio y violación de los derechos de los demás:</strong> Que ocurre desde los 15 años de edad (como lo indican los síntomas de trastorno de conducta antes de los 15 años) y continúa en la edad adulta.</p>
+                        <p><strong>Criterios (necesarios 3 o más):</strong></p>
+                        <ol>
+                            <li>Incumplimiento de las normas sociales respecto a los comportamientos legales, indicado por actuaciones repetidas que son motivo de detención.</li>
+                            <li>Engaño, indicado por mentiras repetidas, uso de alias o estafa para beneficio personal o placer.</li>
+                            <li>Impulsividad o fracaso para planificar con antelación.</li>
+                            <li>Irritabilidad y agresividad, indicados por peleas físicas o agresiones repetidas.</li>
+                            <li>Despreocupación imprudente por la seguridad propia o ajena.</li>
+                            <li>Irresponsabilidad persistente, indicada por la incapacidad de mantener un trabajo con constancia o hacerse cargo de obligaciones económicas.</li>
+                            <li>Falta de remordimientos, indicada por la indiferencia o la justificación del haber dañado, maltratado o robado a otros.</li>
+                        </ol>
+                        
+                        <div class="duration">
+                            <h4>Duración y curso:</h4>
+                            <p>Requiere evidencia de trastorno de conducta con inicio antes de los 15 años. Los comportamientos antisociales alcanzan su punto máximo en la adolescencia tardía y los primeros años de la edad adulta, y pueden disminuir en la cuarta década de vida.</p>
+                        </div>
+                        
+                        <div class="specifiers">
+                            <h4>Especificadores:</h4>
+                            <p><strong>Con rasgos psicopáticos:</strong> Cuando hay falta de remordimiento o culpa, afecto superficial, insensibilidad y falta de empatía.</p>
+                            <p><strong>Con rasgos límite:</strong> Cuando hay inestabilidad emocional e impulsividad marcadas.</p>
+                            <p><strong>Nivel de severidad:</strong> Leve, Moderado, Grave o Extremo basado en frecuencia e intensidad de conductas antisociales.</p>
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="criterion">
+                    <div class="criterion-title">
+                        <span>Trastorno Límite de la Personalidad (F60.3)</span>
+                        <button class="toggle-btn">+</button>
+                    </div>
+                    <div class="criterion-details">
+                        <p><strong>Patrón general de inestabilidad en las relaciones interpersonales:</strong> Autoimagen y afectos, y marcada impulsividad, que comienza en las primeras etapas de la edad adulta y está presente en diversos contextos.</p>
+                        <p><strong>Criterios (necesarios 5 o más):</strong></p>
+                        <ol>
+                            <li>Esfuerzos frenéticos para evitar un abandono real o imaginado.</li>
+                            <li>Patrón de relaciones interpersonales inestables e intensas caracterizado por la alternancia entre los extremos de idealización y devaluación.</li>
+                            <li>Alteración de la identidad: autoimagen o sentido de sí mismo acusada y persistentemente inestable.</li>
+                            <li>Impulsividad en al menos dos áreas que son potencialmente dañinas para sí mismo (gastos, sexo, abuso de sustancias, conducción temeraria, atracones).</li>
+                            <li>Comportamientos, intentos o amenazas suicidas recurrentes, o comportamiento de automutilación.</li>
+                            <li>Inestabilidad afectiva debida a una notable reactividad del estado de ánimo (disforia episódica, irritabilidad o ansiedad que suele durar unas horas y rara vez unos días).</li>
+                            <li>Sentimientos crónicos de vacío.</li>
+                            <li>Ira inapropiada e intensa o dificultades para controlar la ira (muestras frecuentes de mal genio, ira constante, peleas físicas recurrentes).</li>
+                            <li>Ideación paranoide transitoria relacionada con el estrés o síntomas disociativos graves.</li>
+                        </ol>
+                        
+                        <div class="duration">
+                            <h4>Duración y curso:</h4>
+                            <p>El trastorno es más prevalente en la edad adulta temprana y tiende a mejorar en la cuarta o quinta década de vida. Los síntomas más intensos (como comportamientos suicidas) suelen disminuir con el tiempo, mientras que los aspectos interpersonales pueden persistir.</p>
+                        </div>
+                        
+                        <div class="specifiers">
+                            <h4>Especificadores:</h4>
+                            <p><strong>Con rasgos desregulados:</strong> Cuando predominan la labilidad emocional y la ira.</p>
+                            <p><strong>Con rasgos autodestructivos:</strong> Cuando predominan las conductas autolesivas y la autodepreciación.</p>
+                            <p><strong>Con rasgos impulsivos:</strong> Cuando predominan la impulsividad y la toma de riesgos.</p>
+                            <p><strong>Nivel de severidad:</strong> Leve, Moderado, Grave o Extremo basado en frecuencia de crisis y deterioro funcional.</p>
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="criterion">
+                    <div class="criterion-title">
+                        <span>Trastorno Histriónico de la Personalidad (F60.4)</span>
+                        <button class="toggle-btn">+</button>
+                    </div>
+                    <div class="criterion-details">
+                        <p><strong>Patrón general de excesiva emotividad y búsqueda de atención:</strong> Que comienza en las primeras etapas de la edad adulta y está presente en diversos contextos.</p>
+                        <p><strong>Criterios (necesarios 5 o más):</strong></p>
+                        <ol>
+                            <li>Se siente incómodo en situaciones en las que no es el centro de atención.</li>
+                            <li>La interacción con los demás se caracteriza con frecuencia por un comportamiento sexualmente seductor o provocador inapropiado.</li>
+                            <li>Muestra una expresión emocional superficial y rápidamente cambiante.</li>
+                            <li>Utiliza permanentemente el aspecto físico para llamar la atención sobre sí mismo.</li>
+                            <li>Tiene un estilo de hablar que se basa excesivamente en impresiones y que carece de detalles.</li>
+                            <li>Muestra autodramatización, teatralidad y expresión exagerada de la emoción.</li>
+                            <li>Es sugestionable (fácilmente influenciable por los demás o por las circunstancias).</li>
+                            <li>Considera sus relaciones más íntimas de lo que son en realidad.</li>
+                        </ol>
+                        
+                        <div class="duration">
+                            <h4>Duración y curso:</h4>
+                            <p>El trastorno tiende a ser crónico, aunque algunos síntomas (como la búsqueda de atención) pueden disminuir en intensidad con la edad. A menudo se hace más evidente en situaciones sociales o profesionales que requieren interacción significativa.</p>
+                        </div>
+                        
+                        <div class="specifiers">
+                            <h4>Especificadores:</h4>
+                            <p><strong>Con rasgos narcisistas:</strong> Cuando hay concomitante grandiosidad y falta de empatía.</p>
+                            <p><strong>Con rasgos dependientes:</strong> Cuando hay necesidad excesiva de ser cuidado y dificultad para tomar decisiones.</p>
+                            <p><strong>Nivel de severidad:</strong> Leve, Moderado, Grave o Extremo basado en deterioro funcional.</p>
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="criterion">
+                    <div class="criterion-title">
+                        <span>Trastorno Narcisista de la Personalidad (F60.81)</span>
+                        <button class="toggle-btn">+</button>
+                    </div>
+                    <div class="criterion-details">
+                        <p><strong>Patrón general de grandiosidad:</strong> Necesidad de admiración y falta de empatía, que comienza en las primeras etapas de la edad adulta y está presente en diversos contextos.</p>
+                        <p><strong>Criterios (necesarios 5 o más):</strong></p>
+                        <ol>
+                            <li>Tiene un grandioso sentido de autoimportancia (exagera logros y talentos, espera ser reconocido como superior sin logros proporcionados).</li>
+                            <li>Está preocupado por fantasías de éxito ilimitado, poder, brillantez, belleza o amor ideal.</li>
+                            <li>Cree que es "especial" y único y que solo puede ser comprendido por, o solo debería asociarse con, otras personas especiales o de alto estatus.</li>
+                            <li>Exige una admiración excesiva.</li>
+                            <li>Es muy pretencioso, por ejemplo, expectativas irrazonables de recibir un trato especialmente favorable o de que se cumplan automáticamente sus expectativas.</li>
+                            <li>Es interpersonalmente explotador, por ejemplo, se aprovecha de los demás para alcanzar sus propios fines.</li>
+                            <li>Carece de empatía: no está dispuesto a reconocer o identificarse con los sentimientos y necesidades de los demás.</li>
+                            <li>Frecuentemente envidia a los demás o cree que los demás le envidian a él.</li>
+                            <li>Muestra comportamientos o actitudes arrogantes o altaneras.</li>
+                        </ol>
+                        
+                        <div class="duration">
+                            <h4>Duración y curso:</h4>
+                            <p>El trastorno tiende a ser crónico y puede volverse más problemático con la edad, especialmente cuando las fuentes de gratificación narcisista (como la apariencia física o el éxito profesional) disminuyen. Algunos individuos pueden desarrollar síntomas depresivos en la mediana edad.</p>
+                        </div>
+                        
+                        <div class="specifiers">
+                            <h4>Especificadores:</h4>
+                            <p><strong>Tipo grandioso:</strong> Caracterizado por extroversión, dominancia y búsqueda de atención.</p>
+                            <p><strong>Tipo vulnerable:</strong> Caracterizado por introversión, hipersensibilidad a la evaluación y sentimientos de inferioridad encubiertos.</p>
+                            <p><strong>Nivel de severidad:</strong> Leve, Moderado, Grave o Extremo basado en deterioro funcional.</p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            
+            <div class="practice-section">
+                <h3>Ejercicio Práctico: Caso Cluster B</h3>
+                
+                <div class="difficulty-tabs">
+                    <button class="difficulty-tab active" data-difficulty="basic">Básico</button>
+                    <button class="difficulty-tab" data-difficulty="intermediate">Intermedio</button>
+                </div>
+                
+                <div class="case-study basic-case">
+                    <p><strong>Caso Básico:</strong> María, 28 años, acude a terapia por recomendación de su jefe debido a conflictos laborales. En la primera sesión, llega vestida de manera llamativa con maquillaje exagerado. Habla en un tono dramático sobre cómo sus compañeros "no la entienden" y "la envidian" por su talento. Relata que su novio recientemente terminó con ella porque "no podía manejar su intensidad emocional". Muestra cambios rápidos en su estado de ánimo durante la sesión, pasando de la risa al llanto fácilmente. Revela que ha tenido múltiples relaciones intensas pero breves, y que a menudo siente un "vacío horrible" cuando está sola.</p>
+                    
+                    <div class="options" id="cluster-b-basic-options">
+                        <div class="option" data-correct="false">Trastorno Antisocial de la Personalidad</div>
+                        <div class="option" data-correct="true">Trastorno Límite de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno Histriónico de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno Narcisista de la Personalidad</div>
+                    </div>
+                    
+                    <button class="submit-btn">Verificar respuesta</button>
+                    <button class="next-btn">Siguiente caso</button>
+                    
+                    <div class="feedback">
+                        <p><strong>Explicación:</strong> María muestra claros signos de inestabilidad emocional, relaciones interpersonales intensas e inestables, esfuerzos para evitar el abandono, y sentimientos de vacío, que son características centrales del Trastorno Límite de la Personalidad. Aunque tiene algunos rasgos histriónicos y narcisistas, la intensidad de su inestabilidad emocional y el patrón de relaciones apunta más claramente al diagnóstico límite.</p>
+                    </div>
+                </div>
+                
+                <div class="case-study intermediate-case" style="display: none;">
+                    <p><strong>Caso Intermedio:</strong> Carlos, 35 años, consulta por "problemas laborales". Es ejecutivo de ventas y se describe a sí mismo como "el mejor en lo que hago". Habla extensamente sobre sus logros, interrumpiendo frecuentemente al terapeuta. Relata que sus colegas son "incompetentes" y que merece un ascenso. Menciona que su esposa lo dejó recientemente porque "no podía manejar mi éxito". En la entrevista, muestra poca empatía cuando se mencionan los sentimientos de su ex esposa, diciendo que "exagera". Su historial revela múltiples trabajos donde inicialmente era admirado, pero luego despedido por conflictos con superiores. Niega cualquier responsabilidad en estos eventos, atribuyéndolos a "envidia".</p>
+                    
+                    <div class="options" id="cluster-b-intermediate-options">
+                        <div class="option" data-correct="false">Trastorno Antisocial de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno Límite de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno Histriónico de la Personalidad</div>
+                        <div class="option" data-correct="true">Trastorno Narcisista de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno de Personalidad No Especificado</div>
+                    </div>
+                    
+                    <button class="submit-btn">Verificar respuesta</button>
+                    <button class="next-btn">Siguiente caso</button>
+                    
+                    <div class="feedback">
+                        <p><strong>Explicación:</strong> Carlos presenta un patrón claro de grandiosidad, necesidad de admiración y falta de empatía característico del Trastorno Narcisista de la Personalidad. Su historial laboral y personal refleja explotación interpersonal, pretenciosidad y arrogancia. Aunque podría tener algunos rasgos antisociales (por los conflictos laborales), no hay evidencia de comportamiento delictivo o impulsividad característica de otros trastornos del Cluster B.</p>
+                        
+                        <div class="differential-list">
+                            <h4>Diagnóstico Diferencial:</h4>
+                            <ul>
+                                <li><strong>Trastorno Antisocial de la Personalidad:</strong> Requiere evidencia de conducta delictiva y trastorno de conducta en la adolescencia.</li>
+                                <li><strong>Trastorno Histriónico de la Personalidad:</strong> La búsqueda de atención es más emocional y menos basada en grandiosidad.</li>
+                                <li><strong>Trastorno Límite de la Personalidad:</strong> Presentaría más inestabilidad emocional y miedo al abandono.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cluster C Content -->
+        <div id="cluster-c" class="tab-content cluster-c">
+            <h2>Cluster C: Trastornos Ansiosos o Temerosos (DSM-5-TR)</h2>
+            <p>Este cluster incluye trastornos caracterizados por comportamiento ansioso o temeroso.</p>
+            
+            <h3>Criterios Diagnósticos DSM-5-TR</h3>
+            <ul class="criteria-list">
+                <li class="criterion">
+                    <div class="criterion-title">
+                        <span>Trastorno de la Personalidad por Evitación (F60.6)</span>
+                        <button class="toggle-btn">+</button>
+                    </div>
+                    <div class="criterion-details">
+                        <p><strong>Patrón general de inhibición social:</strong> Sentimientos de ineptitud e hipersensibilidad a la evaluación negativa, que comienza en las primeras etapas de la edad adulta y está presente en diversos contextos.</p>
+                        <p><strong>Criterios (necesarios 4 o más):</strong></p>
+                        <ol>
+                            <li>Evita trabajos o actividades que impliquen contacto interpersonal importante por temor a las críticas, la desaprobación o el rechazo.</li>
+                            <li>Es reacio a implicarse con la gente si no está seguro de que va a agradar.</li>
+                            <li>Muestra retraimiento en las relaciones íntimas por temor a ser avergonzado o ridiculizado.</li>
+                            <li>Está preocupado por la posibilidad de ser criticado o rechazado en las situaciones sociales.</li>
+                            <li>Está inhibido en las situaciones interpersonales nuevas a causa de sentimientos de ineptitud.</li>
+                            <li>Se ve a sí mismo socialmente inepto, personalmente poco interesante o inferior a los demás.</li>
+                            <li>Es extremadamente reacio a correr riesgos personales o a implicarse en nuevas actividades porque pueden ser comprometedoras.</li>
+                        </ol>
+                        
+                        <div class="duration">
+                            <h4>Duración y curso:</h4>
+                            <p>El trastorno suele comenzar en la infancia o adolescencia con timidez, aislamiento y miedo a los extraños o a situaciones nuevas. Tiende a ser estable a lo largo del tiempo, aunque la gravedad de los síntomas puede fluctuar con el estrés.</p>
+                        </div>
+                        
+                        <div class="specifiers">
+                            <h4>Especificadores:</h4>
+                            <p><strong>Con rasgos dependientes:</strong> Cuando hay necesidad excesiva de ser cuidado y dificultad para tomar decisiones.</p>
+                            <p><strong>Con rasgos depresivos:</strong> Cuando predominan los sentimientos de desesperanza y baja autoestima.</p>
+                            <p><strong>Nivel de severidad:</strong> Leve, Moderado, Grave o Extremo basado en deterioro funcional.</p>
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="criterion">
+                    <div class="criterion-title">
+                        <span>Trastorno de la Personalidad por Dependencia (F60.7)</span>
+                        <button class="toggle-btn">+</button>
+                    </div>
+                    <div class="criterion-details">
+                        <p><strong>Patrón general de necesidad excesiva de ser cuidado:</strong> Comportamiento sumiso y adhesivo y temores de separación, que comienza en las primeras etapas de la edad adulta y está presente en diversos contextos.</p>
+                        <p><strong>Criterios (necesarios 5 o más):</strong></p>
+                        <ol>
+                            <li>Tiene dificultades para tomar las decisiones cotidianas si no cuenta con un excesivo aconsejamiento y reafirmación por parte de los demás.</li>
+                            <li>Necesita que otros asuman la responsabilidad en las áreas principales de su vida.</li>
+                            <li>Tiene dificultades para expresar desacuerdo con los demás debido al temor a la pérdida de apoyo o aprobación.</li>
+                            <li>Tiene dificultades para iniciar proyectos o para hacer las cosas a su manera (por falta de confianza en su propio juicio o en sus capacidades más que por falta de motivación o de energía).</li>
+                            <li>Va demasiado lejos llevado por su deseo de lograr protección y apoyo de los demás, hasta el punto de presentarse voluntario para realizar tareas desagradables.</li>
+                            <li>Se siente incómodo o desamparado cuando está solo debido a sus temores exagerados a ser incapaz de cuidar de sí mismo.</li>
+                            <li>Cuando termina una relación importante, busca urgentemente otra relación que le proporcione el cuidado y el apoyo que necesita.</li>
+                            <li>Está preocupado de forma no realista por el miedo a que le abandonen y tenga que cuidar de sí mismo.</li>
+                        </ol>
+                        
+                        <div class="duration">
+                            <h4>Duración y curso:</h4>
+                            <p>El trastorno suele ser crónico, con síntomas que persisten a lo largo de la vida adulta. Puede volverse más evidente durante periodos de estrés o cuando las relaciones de apoyo están amenazadas.</p>
+                        </div>
+                        
+                        <div class="specifiers">
+                            <h4>Especificadores:</h4>
+                            <p><strong>Con rasgos evitativos:</strong> Cuando hay miedo al rechazo y evitación social concomitante.</p>
+                            <p><strong>Con rasgos autodestructivos:</strong> Cuando hay tendencia a permanecer en relaciones abusivas o dañinas.</p>
+                            <p><strong>Nivel de severidad:</strong> Leve, Moderado, Grave o Extremo basado en grado de dependencia.</p>
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="criterion">
+                    <div class="criterion-title">
+                        <span>Trastorno Obsesivo-Compulsivo de la Personalidad (F60.5)</span>
+                        <button class="toggle-btn">+</button>
+                    </div>
+                    <div class="criterion-details">
+                        <p><strong>Patrón general de preocupación por el orden:</strong> Perfeccionismo y control mental e interpersonal, a expensas de la flexibilidad, la espontaneidad y la eficiencia, que comienza en las primeras etapas de la edad adulta y está presente en diversos contextos.</p>
+                        <p><strong>Criterios (necesarios 4 o más):</strong></p>
+                        <ol>
+                            <li>Preocupación por los detalles, las normas, las listas, el orden, la organización o los horarios, hasta el punto de perder de vista el objeto principal de la actividad.</li>
+                            <li>Perfeccionismo que interfiere con la finalización de las tareas (por ejemplo, es incapaz de completar un proyecto porque no cumple sus propias exigencias, que son demasiado estrictas).</li>
+                            <li>Dedicación excesiva al trabajo y a la productividad con exclusión de las actividades de ocio y las amistades (no atribuible a necesidades económicas evidentes).</li>
+                            <li>Excesiva terquedad, escrupulosidad e inflexibilidad en temas de moral, ética o valores (no atribuible a identificación cultural o religiosa).</li>
+                            <li>Incapacidad para tirar los objetos gastados o inútiles, incluso cuando no tienen un valor sentimental.</li>
+                            <li>Es reacio a delegar tareas o trabajo en otros, a menos que estos se sometan exactamente a su manera de hacer las cosas.</li>
+                            <li>Adopta un estilo avaro en los gastos para él y para los demás; el dinero se considera algo que hay que acumular con vistas a catástrofes futuras.</li>
+                            <li>Muestra rigidez y obstinación.</li>
+                        </ol>
+                        
+                        <div class="duration">
+                            <h4>Duración y curso:</h4>
+                            <p>El trastorno suele comenzar en la edad adulta temprana y tiende a ser crónico, aunque algunos síntomas (como el perfeccionismo extremo) pueden disminuir con la edad. El deterioro funcional puede acumularse gradualmente debido a la pérdida de relaciones y oportunidades laborales.</p>
+                        </div>
+                        
+                        <div class="specifiers">
+                            <h4>Especificadores:</h4>
+                            <p><strong>Con rigidez predominante:</strong> Cuando la inflexibilidad y el control son los rasgos principales.</p>
+                            <p><strong>Con perfeccionismo predominante:</strong> Cuando las preocupaciones por el orden y los detalles son los rasgos principales.</p>
+                            <p><strong>Nivel de severidad:</strong> Leve, Moderado, Grave o Extremo basado en deterioro funcional.</p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            
+            <div class="practice-section">
+                <h3>Ejercicio Práctico: Caso Cluster C</h3>
+                
+                <div class="difficulty-tabs">
+                    <button class="difficulty-tab active" data-difficulty="basic">Básico</button>
+                    <button class="difficulty-tab" data-difficulty="intermediate">Intermedio</button>
+                </div>
+                
+                <div class="case-study basic-case">
+                    <p><strong>Caso Básico:</strong> Carlos, 45 años, consulta por "estrés laboral". Es contador en una empresa importante y se describe a sí mismo como extremadamente meticuloso. Sus colegas lo describen como "rígido" y "perfeccionista". Carlos admite que pasa horas revisando informes para asegurarse de que no haya errores, a menudo quedándose hasta tarde en la oficina. En casa, su esposa se queja de que es "demasiado controlador" con las finanzas familiares y que insiste en que todo se haga de una manera muy específica. Carlos dice que le gustaría ser más flexible pero que "las cosas deben hacerse correctamente". Niega tener pensamientos intrusivos o compulsiones, pero admite que se siente muy ansioso cuando las cosas no están en orden.</p>
+                    
+                    <div class="options" id="cluster-c-basic-options">
+                        <div class="option" data-correct="false">Trastorno de la Personalidad por Evitación</div>
+                        <div class="option" data-correct="false">Trastorno de la Personalidad por Dependencia</div>
+                        <div class="option" data-correct="true">Trastorno Obsesivo-Compulsivo de la Personalidad</div>
+                    </div>
+                    
+                    <button class="submit-btn">Verificar respuesta</button>
+                    <button class="next-btn">Siguiente caso</button>
+                    
+                    <div class="feedback">
+                        <p><strong>Explicación:</strong> Carlos muestra un patrón claro de preocupación por el orden, perfeccionismo y control mental e interpersonal, que son características centrales del Trastorno Obsesivo-Compulsivo de la Personalidad. A diferencia del TOC (que incluye obsesiones y compulsiones), este trastorno se manifiesta como un patrón general de personalidad. No hay evidencia de evitación social o de dependencia excesiva de otros.</p>
+                    </div>
+                </div>
+                
+                <div class="case-study intermediate-case" style="display: none;">
+                    <p><strong>Caso Intermedio:</strong> Ana, 38 años, consulta por "ansiedad social". Trabaja como bibliotecaria y vive sola. Describe que desde la adolescencia ha evitado situaciones sociales por miedo a "hacer el ridículo". Tiene dos amigas cercanas de la infancia, pero evita conocer gente nueva. Relata que recientemente rechazó un ascenso porque implicaba dar capacitaciones a grupos. En la entrevista, se muestra tensa y preocupada por "decir algo incorrecto". Admite que le gustaría tener pareja pero que evita citas por miedo al rechazo. Su historial revela que terminó la universidad con excelentes notas pero evitó actividades extracurriculares. Niega síntomas depresivos pero reconoce sentirse "inferior" en situaciones sociales.</p>
+                    
+                    <div class="options" id="cluster-c-intermediate-options">
+                        <div class="option" data-correct="true">Trastorno de la Personalidad por Evitación</div>
+                        <div class="option" data-correct="false">Trastorno de la Personalidad por Dependencia</div>
+                        <div class="option" data-correct="false">Trastorno Obsesivo-Compulsivo de la Personalidad</div>
+                        <div class="option" data-correct="false">Fobia Social</div>
+                    </div>
+                    
+                    <button class="submit-btn">Verificar respuesta</button>
+                    <button class="next-btn">Siguiente caso</button>
+                    
+                    <div class="feedback">
+                        <p><strong>Explicación:</strong> Ana presenta un patrón generalizado de inhibición social, sentimientos de ineptitud e hipersensibilidad a la evaluación negativa, característico del Trastorno de Personalidad por Evitación. Aunque podría tener fobia social, la afectación es más amplia y afecta su sentido de identidad y patrones relacionales a largo plazo.</p>
+                        
+                        <div class="differential-list">
+                            <h4>Diagnóstico Diferencial:</h4>
+                            <ul>
+                                <li><strong>Fobia Social:</strong> La ansiedad estaría más circunscrita a situaciones específicas sin el patrón generalizado de personalidad.</li>
+                                <li><strong>Trastorno de Personalidad por Dependencia:</strong> No muestra la necesidad excesiva de ser cuidado característica.</li>
+                                <li><strong>Trastorno Esquizoide de la Personalidad:</strong> No hay evidencia de falta de deseo de relaciones, sino miedo al rechazo.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Advanced Cases Content -->
+        <div id="advanced" class="tab-content advanced">
+            <h2>Casos Clínicos Avanzados</h2>
+            <p>Esta sección presenta casos complejos con diagnóstico diferencial entre clusters o comorbilidad con otros trastornos.</p>
+            
+            <div class="practice-section">
+                <h3>Ejercicios de Diagnóstico Diferencial</h3>
+                
+                <div class="case-study advanced-case">
+                    <p><strong>Caso Avanzado 1:</strong> Roberto, 40 años, es referido por su médico por "problemas de ira". Trabaja como guardia de seguridad y tiene múltiples reportes por uso excesivo de fuerza. En la entrevista, se muestra cauteloso y sospechoso, mencionando que "la gente siempre quiere aprovecharse". Relata que desde joven ha tenido problemas legales menores (peleas, vandalismo) pero que "nunca me atraparon por nada serio". Muestra poco remordimiento por sus acciones, diciendo que sus víctimas "se lo merecían". Su historial revela expulsión escolar por agresión a un profesor, múltiples trabajos perdidos por conflictos con superiores, y dos matrimonios fallidos por infidelidades y violencia verbal. Niega síntomas depresivos pero admite aburrirse fácilmente y buscar "emociones fuertes".</p>
+                    
+                    <div class="options" id="advanced-case-1-options">
+                        <div class="option" data-correct="false">Trastorno Paranoide de la Personalidad</div>
+                        <div class="option" data-correct="true">Trastorno Antisocial de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno Narcisista de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno Límite de la Personalidad</div>
+                    </div>
+                    
+                    <button class="submit-btn">Verificar respuesta</button>
+                    <button class="next-btn">Siguiente caso</button>
+                    
+                    <div class="feedback">
+                        <p><strong>Explicación:</strong> Roberto muestra un patrón claro de desprecio por los derechos de los demás, impulsividad, agresividad, irresponsabilidad y falta de remordimientos, característico del Trastorno Antisocial de la Personalidad. Aunque tiene cierta suspicacia (como en el paranoide), el patrón general de comportamiento delictivo y antisocial es más prominente.</p>
+                        
+                        <div class="differential-list">
+                            <h4>Diagnóstico Diferencial:</h4>
+                            <ul>
+                                <li><strong>Trastorno Paranoide de la Personalidad:</strong> La suspicacia sería más generalizada sin la historia de conducta antisocial.</li>
+                                <li><strong>Trastorno Narcisista de la Personalidad:</strong> No muestra la grandiosidad o necesidad de admiración característica.</li>
+                                <li><strong>Trastorno Límite de la Personalidad:</strong> No hay evidencia de inestabilidad emocional o miedo al abandono.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="case-study advanced-case" style="display: none;">
+                    <p><strong>Caso Avanzado 2:</strong> Sofía, 30 años, es hospitalizada tras un intento de suicidio. Relata una historia de múltiples relaciones intensas pero caóticas, con patrones de idealización y posterior devaluación de sus parejas. Tiene antecedentes de automutilaciones desde los 16 años. En la entrevista, muestra labilidad emocional, pasando de la ira a la tristeza rápidamente. Describe sentimientos crónicos de vacío y "no saber quién soy". Su historial revela abuso sexual en la infancia y consumo problemático de alcohol entre los 20-25 años. Actualmente trabaja esporádicamente como artista, pero tiene dificultades para mantener empleos estables debido a conflictos interpersonales.</p>
+                    
+                    <div class="options" id="advanced-case-2-options">
+                        <div class="option" data-correct="false">Trastorno Histriónico de la Personalidad</div>
+                        <div class="option" data-correct="true">Trastorno Límite de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno Bipolar II</div>
+                        <div class="option" data-correct="false">Trastorno de Estrés Postraumático Complejo</div>
+                    </div>
+                    
+                    <button class="submit-btn">Verificar respuesta</button>
+                    <button class="next-btn">Siguiente caso</button>
+                    
+                    <div class="feedback">
+                        <p><strong>Explicación:</strong> Sofía presenta el patrón característico de inestabilidad emocional, relaciones interpersonales caóticas, alteración de la identidad, conductas suicidas y sentimientos de vacío del Trastorno Límite de la Personalidad. Aunque podría tener elementos de otros diagnósticos, el patrón global se ajusta mejor al TLP.</p>
+                        
+                        <div class="differential-list">
+                            <h4>Diagnóstico Diferencial:</h4>
+                            <ul>
+                                <li><strong>Trastorno Bipolar II:</strong> Los cambios de ánimo en el TLP son más reactivos y de menor duración que los episodios hipomaníacos/depresivos.</li>
+                                <li><strong>Trastorno Histriónico de la Personalidad:</strong> La búsqueda de atención es menos central que la inestabilidad emocional y el miedo al abandono.</li>
+                                <li><strong>Trastorno de Estrés Postraumático Complejo:</strong> Aunque hay historia de trauma, los síntomas actuales son más consistentes con TLP.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="case-study advanced-case" style="display: none;">
+                    <p><strong>Caso Avanzado 3:</strong> Dr. González, 50 años, es referido por el comité de ética hospitalaria por múltiples quejas de pacientes y colegas. Es un cirujano reconocido pero tiene fama de ser "imposible de trabajar con él". Insiste en que todos los procedimientos se hagan exactamente a su manera, criticando duramente cualquier desviación. En la entrevista, se muestra arrogante, mencionando que "los estándares han bajado mucho en esta profesión". Relata que sus dos divorcios se debieron a que sus esposas "no entendían mis compromisos profesionales". Niega problemas de ira pero admite haber roto equipos médicos en "momentos de frustración". Su historial revela excelentes habilidades técnicas pero nula participación en trabajo en equipo o docencia.</p>
+                    
+                    <div class="options" id="advanced-case-3-options">
+                        <div class="option" data-correct="false">Trastorno Obsesivo-Compulsivo de la Personalidad</div>
+                        <div class="option" data-correct="true">Trastorno Narcisista de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno Antisocial de la Personalidad</div>
+                        <div class="option" data-correct="false">Trastorno Paranoide de la Personalidad</div>
+                    </div>
+                    
+                    <button class="submit-btn">Verificar respuesta</button>
+                    <button class="next-btn">Siguiente caso</button>
+                    
+                    <div class="feedback">
+                        <p><strong>Explicación:</strong> El Dr. González muestra el patrón de grandiosidad, necesidad de admiración, falta de empatía y arrogancia característico del Trastorno Narcisista de la Personalidad. Aunque tiene cierto perfeccionismo (como en el TOCP), su sentido de superioridad y explotación de los demás son más prominentes.</p>
+                        
+                        <div class="differential-list">
+                            <h4>Diagnóstico Diferencial:</h4>
+                            <ul>
+                                <li><strong>Trastorno Obsesivo-Compulsivo de la Personalidad:</strong> La preocupación sería más por el orden y perfección que por la admiración y estatus.</li>
+                                <li><strong>Trastorno Antisocial de la Personalidad:</strong> No hay evidencia de comportamiento delictivo o impulsividad característica.</li>
+                                <li><strong>Trastorno Paranoide de la Personalidad:</strong> La suspicacia no es el síntoma principal.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Tab functionality
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                
+                // Update active tab button
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update active tab content
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                
+                // Update progress bar
+                updateProgressBar();
+            });
+        });
+        
+        // Toggle criterion details
+        const toggleBtns = document.querySelectorAll('.toggle-btn');
+        
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const details = btn.parentElement.nextElementSibling;
+                details.classList.toggle('show');
+                
+                // Change button text
+                if (details.classList.contains('show')) {
+                    btn.textContent = '-';
+                } else {
+                    btn.textContent = '+';
+                }
+            });
+        });
+        
+        // Difficulty tabs functionality
+        const difficultyTabs = document.querySelectorAll('.difficulty-tab');
+        
+        difficultyTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const difficulty = tab.getAttribute('data-difficulty');
+                const caseContainer = tab.closest('.practice-section');
+                
+                // Update active difficulty tab
+                caseContainer.querySelectorAll('.difficulty-tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                tab.classList.add('active');
+                
+                // Show selected case and hide others
+                caseContainer.querySelectorAll('.basic-case, .intermediate-case').forEach(caseStudy => {
+                    caseStudy.style.display = 'none';
+                });
+                
+                if (difficulty === 'basic') {
+                    caseContainer.querySelector('.basic-case').style.display = 'block';
+                } else {
+                    caseContainer.querySelector('.intermediate-case').style.display = 'block';
+                }
+            });
+        });
+        
+        // Practice exercises functionality
+        const options = document.querySelectorAll('.option');
+        const submitBtns = document.querySelectorAll('.submit-btn');
+        const nextBtns = document.querySelectorAll('.next-btn');
+        const feedbacks = document.querySelectorAll('.feedback');
+        
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove previous selections in this question
+                const parentOptions = option.parentElement;
+                parentOptions.querySelectorAll('.option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Select clicked option
+                option.classList.add('selected');
+            });
+        });
+        
+        submitBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const parentCase = btn.parentElement;
+                const selectedOption = parentCase.querySelector('.option.selected');
+                const feedback = parentCase.querySelector('.feedback');
+                const nextBtn = parentCase.querySelector('.next-btn');
+                
+                if (!selectedOption) {
+                    alert('Por favor selecciona una opción antes de verificar.');
+                    return;
+                }
+                
+                // Show feedback
+                feedback.classList.add('show');
+                
+                // Mark correct/incorrect
+                if (selectedOption.getAttribute('data-correct') === 'true') {
+                    feedback.classList.add('correct');
+                    feedback.classList.remove('incorrect');
+                    selectedOption.classList.add('correct');
+                } else {
+                    feedback.classList.add('incorrect');
+                    feedback.classList.remove('correct');
+                    selectedOption.classList.add('incorrect');
+                    
+                    // Also mark the correct answer
+                    const correctOption = parentCase.querySelector('.option[data-correct="true"]');
+                    correctOption.classList.add('correct');
+                }
+                
+                // Disable all options
+                parentCase.querySelectorAll('.option').forEach(opt => {
+                    opt.style.cursor = 'default';
+                    opt.style.pointerEvents = 'none';
+                });
+                
+                // Hide submit button and show next button
+                btn.style.display = 'none';
+                nextBtn.style.display = 'inline-block';
+                
+                // Update progress bar
+                updateProgressBar();
+            });
+        });
+        
+        nextBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const currentCase = btn.closest('.case-study');
+                const caseContainer = currentCase.parentElement;
+                const nextCase = currentCase.nextElementSibling;
+                
+                if (nextCase && nextCase.classList.contains('case-study')) {
+                    // Hide current case and show next one
+                    currentCase.style.display = 'none';
+                    nextCase.style.display = 'block';
+                    
+                    // Reset next button
+                    btn.style.display = 'none';
+                    currentCase.querySelector('.submit-btn').style.display = 'inline-block';
+                    
+                    // Reset options and feedback
+                    currentCase.querySelectorAll('.option').forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect');
+                        opt.style.pointerEvents = 'auto';
+                        opt.style.cursor = 'pointer';
+                    });
+                    currentCase.querySelector('.feedback').classList.remove('show', 'correct', 'incorrect');
+                } else {
+                    // If no more cases, show message
+                    alert('Has completado todos los casos de esta sección. ¡Buen trabajo!');
+                }
+            });
+        });
+        
+        // Progress bar functionality
+        function updateProgressBar() {
+            // Calculate progress based on completed exercises
+            // In a real app, this would track actual progress
+            const activeTab = document.querySelector('.tab-content.active');
+            const progressBar = document.getElementById('progress-bar');
+            
+            // Simulate progress - in a real app, track actual completion
+            let progress = 0;
+            if (activeTab.id === 'cluster-a') {
+                progress = 25;
+            } else if (activeTab.id === 'cluster-b') {
+                progress = 50;
+            } else if (activeTab.id === 'cluster-c') {
+                progress = 75;
+            } else if (activeTab.id === 'advanced') {
+                progress = 95;
+            }
+            
+            progressBar.style.width = `${progress}%`;
+        }
+        
+        // Initialize progress bar
+        updateProgressBar();
+    </script>
+</body>
+</html>
